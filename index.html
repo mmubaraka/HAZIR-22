@@ -5,222 +5,220 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>HAZIR-22 | Premium Store</title>
     
+    <!-- API Telegram & Firebase -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <style>
-        /* ================= ДИЗАЙН-СИСТЕМА (LUXURY APPLE & JAPANESE ZEN) ================= */
+        /* ================= ДИЗАЙН-СИСТЕМА (ОРИГИНАЛЬНЫЙ ЯПОНСКИЙ МИНИМАЛИЗМ) ================= */
         :root {
-            --bg-page: #F5F5F7; /* Apple Gray */
+            --bg-page: #FAFAFA;
             --surface: #FFFFFF;
-            --text-main: #1D1D1F; /* Deep Graphite */
-            --text-muted: #86868B;
-            --border: rgba(0, 0, 0, 0.08);
-            --accent-dark: #000000;
-            --accent-green: #00A86B; /* Благородный изумрудный для денег/успеха */
-            --accent-green-bg: rgba(0, 168, 107, 0.1);
+            --text-main: #111111;
+            --text-muted: #888888;
+            --border: #EAEAEA;
+            --accent-dark: #111111;
+            --accent-mint-bg: #E8F5E9;
+            --accent-mint-text: #1E8E3E;
+            --accent-green: #059669; /* Зеленый цвет для ползунков калькулятора */
             --danger: #FF3B30;
-            --radius-sm: 10px;
-            --radius-md: 14px;
-            --radius-lg: 20px;
-            --shadow-float: 0 10px 40px rgba(0,0,0,0.06);
-            --transition: all 0.2s ease-out;
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --transition: all 0.25s ease;
             --safe-bottom: env(safe-area-inset-bottom, 20px);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif; -webkit-tap-highlight-color: transparent; outline: none; }
-        body { background-color: var(--bg-page); color: var(--text-main); overflow-x: hidden; padding-bottom: calc(90px + var(--safe-bottom)); -webkit-font-smoothing: antialiased; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, sans-serif; -webkit-tap-highlight-color: transparent; outline: none; }
+        body { background-color: var(--bg-page); color: var(--text-main); overflow-x: hidden; padding-bottom: calc(90px + var(--safe-bottom)); }
         .hidden { display: none !important; }
 
         /* ================= УВЕДОМЛЕНИЯ И МОДАЛКИ ================= */
         #toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
-        .toast { background: rgba(29, 29, 31, 0.95); backdrop-filter: blur(10px); color: #fff; padding: 14px 28px; border-radius: 30px; font-size: 14px; font-weight: 600; text-align: center; opacity: 0; transform: translateY(-20px); transition: var(--transition); box-shadow: var(--shadow-float); }
+        .toast { background: var(--accent-dark); color: #fff; padding: 12px 24px; border-radius: 30px; font-size: 13px; font-weight: 500; text-align: center; opacity: 0; transform: translateY(-20px); transition: var(--transition); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         .toast.show { opacity: 1; transform: translateY(0); }
 
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(245,245,247,0.8); backdrop-filter: blur(10px); z-index: 3000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: var(--transition); }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(250,250,250,0.85); backdrop-filter: blur(5px); z-index: 3000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: var(--transition); }
         .modal-overlay.active { opacity: 1; pointer-events: auto; }
-        .modal-content { background: var(--surface); padding: 32px; border-radius: var(--radius-lg); width: 90%; max-width: 360px; box-shadow: var(--shadow-float); border: 1px solid var(--border); transform: translateY(20px); transition: var(--transition); text-align: center; }
+        .modal-content { background: var(--surface); padding: 30px; border-radius: var(--radius-lg); width: 90%; max-width: 340px; box-shadow: 0 15px 40px rgba(0,0,0,0.08); border: 1px solid var(--border); transform: translateY(20px); transition: var(--transition); text-align: center;}
         .modal-overlay.active .modal-content { transform: translateY(0); }
         
-        .modal-content h3 { margin-bottom: 24px; font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
-        .modal-content .form-control { margin-bottom: 16px; text-align: left; }
-        .pin-input { font-size: 28px !important; text-align: center !important; letter-spacing: 12px; font-weight: 800; background: var(--bg-page); border: none; }
-        .modal-btns { display: flex; gap: 12px; margin-top: 24px; }
+        .modal-content h3 { margin-bottom: 20px; font-size: 18px; font-weight: 700; }
+        .modal-content .form-control { margin-bottom: 15px; text-align: left; }
+        .pin-input { font-size: 24px !important; text-align: center; letter-spacing: 10px; font-weight: 700; }
+        .modal-btns { display: flex; gap: 10px; margin-top: 25px; }
 
         /* ================= ШАПКА ================= */
-        header { position: fixed; top: 0; width: 100%; background: rgba(255, 255, 255, 0.85); backdrop-filter: saturate(180%) blur(20px); border-bottom: 1px solid var(--border); z-index: 1000; padding: env(safe-area-inset-top) 0 12px 0; transform: translateZ(0); }
+        header { position: fixed; top: 0; width: 100%; background: rgba(255, 255, 255, 0.95); backdrop-filter: saturate(180%) blur(15px); border-bottom: 1px solid var(--border); z-index: 1000; padding: env(safe-area-inset-top) 0 15px 0; }
         .header-content { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 60px; max-width: 1200px; margin: 0 auto; text-align: center; padding-top: 10px; cursor: pointer; user-select: none;}
-        .logo-main { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; color: var(--text-main); line-height: 1; margin-bottom: 4px;}
+        .logo-main { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; color: var(--accent-dark); line-height: 1; margin-bottom: 4px;}
         .logo-sub { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); }
-        .logo-sub span { color: var(--accent-green); }
+        .logo-sub span { color: var(--accent-mint-text); }
 
         .container { max-width: 800px; margin: 0 auto; padding: 0 20px; }
-        .main-content { margin-top: 100px; animation: fadeIn 0.4s ease-out; }
+        .main-content { margin-top: 100px; animation: fadeIn 0.4s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* ================= КНОПКИ (ТАКТИЛЬНЫЕ) ================= */
-        .btn { width: 100%; padding: 16px; border-radius: var(--radius-md); font-size: 16px; font-weight: 600; cursor: pointer; border: none; transition: var(--transition); display: flex; align-items: center; justify-content: center; gap: 8px; touch-action: manipulation; }
-        .btn:active { transform: scale(0.96); }
-        .btn-primary { background: var(--accent-dark); color: #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        .btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--text-main); }
-        .btn-outline:active { background: var(--border); }
-        .btn-danger { background: #FFF0F0; border: 1px solid #FFCDCD; color: var(--danger); font-size: 13px; padding: 12px; border-radius: var(--radius-sm); }
+        /* ================= КНОПКИ ================= */
+        .btn { width: 100%; padding: 16px; border-radius: var(--radius-sm); font-size: 15px; font-weight: 600; cursor: pointer; border: none; transition: var(--transition); display: flex; align-items: center; justify-content: center; gap: 8px; touch-action: manipulation;}
+        .btn:active { transform: scale(0.97); opacity: 0.9; }
+        .btn-primary { background: var(--accent-dark); color: #fff; }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--accent-dark); }
+        .btn-outline:hover { border-color: var(--accent-dark); }
+        .btn-danger { background: #FFF0F0; border: 1px solid #FFCDCD; color: var(--danger); font-size: 12px; padding: 10px; border-radius: var(--radius-sm); }
 
         /* ================= БАННЕР И КАТАЛОГ ================= */
-        .hero-banner { border-radius: var(--radius-lg); padding: 32px 24px; margin-bottom: 24px; position: relative; overflow: hidden; cursor: pointer; border: 1px solid var(--border); }
-        .hero-banner:active { transform: scale(0.98); }
-        .hero-banner h2 { font-size: 26px; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.5px; z-index: 2; position: relative;}
-        .hero-banner p { font-size: 15px; margin-bottom: 18px; max-width: 90%; line-height: 1.4; z-index: 2; position: relative; opacity: 0.9;}
-        .hero-badge { display: inline-block; padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; z-index: 2; position: relative;}
+        .hero-banner { border-radius: var(--radius-lg); padding: 25px; margin-bottom: 25px; position: relative; overflow: hidden; transition: var(--transition); box-shadow: 0 2px 10px rgba(0,0,0,0.02); cursor: pointer; }
+        .hero-banner:hover { box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .hero-banner h2 { font-size: 22px; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.5px; z-index: 2; position: relative;}
+        .hero-banner p { font-size: 14px; margin-bottom: 16px; max-width: 90%; line-height: 1.4; z-index: 2; position: relative; color: var(--text-muted);}
+        .hero-badge { display: inline-block; padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; z-index: 2; position: relative;}
         
-        .banner-light { background: var(--surface); color: var(--text-main); }
-        .banner-light .hero-badge { background: var(--accent-green-bg); color: var(--accent-green); }
-        .banner-dark { background: #1C1C1E; color: #fff; border: none;}
+        .banner-light { background: var(--surface); border: 1px solid var(--border); color: var(--text-main); }
+        .banner-light .hero-badge { background: var(--accent-mint-bg); color: var(--accent-mint-text); }
+        .banner-dark { background: linear-gradient(135deg, #111111 0%, #2c2c2e 100%); color: #fff; border: none;}
         .banner-dark .hero-badge { background: rgba(255,255,255,0.2); color: #fff; }
+        .banner-mint { background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%); color: #111; border: none;}
+        .banner-mint .hero-badge { background: #1E8E3E; color: #fff; }
 
-        .search-container { margin-bottom: 20px; position: relative; }
-        .search-container input { width: 100%; padding: 16px 20px 16px 44px; border-radius: var(--radius-md); border: 1px solid var(--border); font-size: 16px; background: var(--surface); transition: 0.2s; font-weight: 500; }
-        .search-container input:focus { border-color: var(--accent-dark); box-shadow: var(--shadow-float); }
+        .search-container { margin-bottom: 15px; position: relative; }
+        .search-container input { width: 100%; padding: 15px 20px 15px 45px; border-radius: var(--radius-md); border: 1px solid var(--border); font-size: 15px; background: var(--surface); transition: 0.2s; font-weight: 500; }
+        .search-container input:focus { border-color: var(--accent-dark); }
         .search-icon { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); opacity: 0.4; }
 
-        .filters { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none; -webkit-overflow-scrolling: touch;}
+        .filters { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 15px; scrollbar-width: none; -webkit-overflow-scrolling: touch;}
         .filters::-webkit-scrollbar { display: none; }
-        .filter-chip { padding: 10px 20px; background: var(--surface); border: 1px solid var(--border); border-radius: 30px; font-size: 14px; font-weight: 600; color: var(--text-muted); white-space: nowrap; transition: var(--transition); cursor: pointer; }
+        .filter-chip { padding: 10px 20px; background: var(--surface); border: 1px solid var(--border); border-radius: 30px; font-size: 13px; font-weight: 600; color: var(--text-muted); white-space: nowrap; transition: var(--transition); cursor: pointer; }
         .filter-chip.active { background: var(--accent-dark); color: #fff; border-color: var(--accent-dark); }
 
-        .empty-state { text-align: center; padding: 40px 20px; color: var(--text-muted); font-size: 15px; font-weight: 500; }
-
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 16px; margin-bottom: 40px;}
-        .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; text-align: center; cursor: pointer; transition: var(--transition); display: flex; flex-direction: column; }
-        .card:active { transform: scale(0.97); }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; margin-bottom: 40px;}
+        .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px; text-align: center; cursor: pointer; transition: var(--transition); display: flex; flex-direction: column; }
+        .card:hover { border-color: #d0d0d0; transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.04); }
         .card img { width: 100%; height: 160px; object-fit: contain; margin-bottom: 16px; pointer-events: none;}
-        .card-brand { font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 1px; margin-bottom: 6px; }
-        .card-title { font-size: 16px; font-weight: 700; margin-bottom: 12px; line-height: 1.3; flex-grow: 1; letter-spacing: -0.3px; color: var(--text-main);}
-        .card-price { font-size: 18px; font-weight: 800; color: var(--accent-dark); }
+        .card-brand { font-size: 10px; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 1px; margin-bottom: 6px; }
+        .card-title { font-size: 15px; font-weight: 600; margin-bottom: 10px; line-height: 1.3; flex-grow: 1; letter-spacing: -0.3px;}
+        .card-price { font-size: 17px; font-weight: 700; color: var(--accent-dark); }
 
         /* ================= КАРТОЧКА ТОВАРА ================= */
         .nav-back { display: inline-flex; align-items: center; color: var(--text-muted); font-size: 15px; font-weight: 600; margin-bottom: 20px; cursor: pointer; padding: 10px 0; transition: color 0.2s; }
-        .nav-back:hover { color: var(--text-main); }
+        .nav-back:hover { color: var(--accent-dark); }
         
-        .product-view { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 32px; margin-bottom: 100px; box-shadow: var(--shadow-float); }
-        .gallery { height: 340px; display: flex; align-items: center; justify-content: center; margin-bottom: 24px; background: var(--bg-page); border-radius: var(--radius-md); padding: 20px; }
-        .gallery img { max-width: 100%; max-height: 100%; object-fit: contain; transition: opacity 0.3s ease; }
+        .product-view { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 30px; margin-bottom: 100px; }
+        .gallery { height: 320px; display: flex; align-items: center; justify-content: center; margin-bottom: 25px; background: var(--bg-page); border-radius: var(--radius-md); padding: 20px; border: 1px solid var(--border); }
+        .gallery img { max-width: 100%; max-height: 100%; object-fit: contain; transition: opacity 0.2s ease; }
         
-        .pd-brand-tag { font-size: 13px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block; }
-        .pd-title { font-size: 28px; font-weight: 800; margin-bottom: 24px; letter-spacing: -0.5px; }
+        .pd-brand-tag { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block; }
+        .pd-title { font-size: 26px; font-weight: 700; margin-bottom: 12px; letter-spacing: -0.5px; }
         
-        .installment-trigger { background: var(--accent-green-bg); padding: 16px 20px; border-radius: var(--radius-md); margin-bottom: 32px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.2s; border: 1px solid rgba(0, 168, 107, 0.15);}
+        .installment-trigger { background: var(--accent-mint-bg); padding: 16px 20px; border-radius: var(--radius-md); margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(30,142,62,0.1); cursor: pointer; transition: 0.2s; }
         .installment-trigger:active { transform: scale(0.98); }
-        .installment-trigger-text { font-size: 14px; color: var(--accent-green); font-weight: 700; }
-        .installment-trigger-val { font-size: 18px; font-weight: 800; color: var(--accent-green); display: flex; align-items: center; gap: 8px;}
+        .installment-trigger-text { font-size: 13px; color: var(--accent-mint-text); font-weight: 600; }
+        .installment-trigger-val { font-size: 18px; font-weight: 700; color: var(--accent-mint-text); display: flex; align-items: center; gap: 8px;}
 
-        .section-title { font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 16px; margin-top: 32px; letter-spacing: 0.5px; border-bottom: 1px solid var(--border); padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center;}
+        .section-title { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 15px; margin-top: 30px; letter-spacing: 0.5px; border-bottom: 1px solid var(--border); padding-bottom: 8px; display: flex; justify-content: space-between; align-items: center;}
         
         /* Цвета */
-        .color-row { display: flex; gap: 16px; flex-wrap: wrap; }
+        .color-row { display: flex; gap: 15px; flex-wrap: wrap; }
         .color-wrapper { display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; }
-        .color-dot { width: 48px; height: 48px; border-radius: 50%; border: 2px solid transparent; padding: 4px; transition: var(--transition); }
+        .color-dot { width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--border); padding: 4px; transition: var(--transition); }
         .color-dot-inner { width: 100%; height: 100%; border-radius: 50%; border: 1px solid rgba(0,0,0,0.05); }
-        .color-wrapper.active .color-dot { border-color: var(--accent-dark); transform: scale(1.1); }
+        .color-wrapper.active .color-dot { border-color: var(--accent-dark); transform: scale(1.1); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         .color-name-display { font-size: 12px; font-weight: 600; color: var(--text-muted); opacity: 0.5; transition: 0.2s; }
         .color-wrapper.active .color-name-display { opacity: 1; color: var(--text-main); }
 
-        /* SKU Grid */
-        .sku-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px; }
-        .sku-item { border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 16px 12px; text-align: center; transition: var(--transition); cursor: pointer; background: var(--surface); display: flex; flex-direction: column; gap: 6px; }
-        .sku-item.active { border-color: var(--accent-dark); background: var(--accent-dark); color: #fff; }
-        .sku-name { font-size: 14px; font-weight: 600; }
+        /* Матрица конфигураций */
+        .sku-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; }
+        .sku-item { border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px 10px; text-align: center; transition: var(--transition); cursor: pointer; background: var(--surface); display: flex; flex-direction: column; gap: 4px; }
+        .sku-item.active { border-color: var(--accent-dark); background: var(--accent-dark); color: #fff; box-shadow: 0 6px 15px rgba(0,0,0,0.15); }
+        .sku-name { font-size: 13px; font-weight: 600; }
 
-        /* Кросс-продажи (IOS Toggle) */
-        .accessory-item { display: flex; justify-content: space-between; align-items: center; padding: 16px; border: 1.5px solid var(--border); border-radius: var(--radius-md); margin-bottom: 12px; background: var(--surface); transition: var(--transition); }
-        .accessory-item.active { border-color: var(--accent-dark); }
+        /* Кросс-продажи */
+        .accessory-item { display: flex; justify-content: space-between; align-items: center; padding: 16px; border: 1px solid var(--border); border-radius: var(--radius-md); margin-bottom: 10px; background: var(--surface); transition: var(--transition);}
+        .accessory-item.active { border-color: var(--accent-mint-text); background: var(--accent-mint-bg); }
         .acc-info { display: flex; flex-direction: column; gap: 4px; }
-        .acc-name { font-size: 16px; font-weight: 600; color: var(--text-main); }
-        .acc-price { font-size: 14px; color: var(--text-muted); font-weight: 600; transition: var(--transition); }
-        .accessory-item.active .acc-price { color: var(--accent-dark); }
-        
-        .toggle-switch { position: relative; width: 48px; height: 28px; }
+        .acc-name { font-size: 15px; font-weight: 600; color: var(--text-main); }
+        .acc-price { font-size: 14px; color: var(--text-muted); font-weight: 500; transition: var(--transition);}
+        .accessory-item.active .acc-price { color: var(--accent-mint-text); }
+
+        .toggle-switch { position: relative; width: 46px; height: 26px; }
         .toggle-switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--border); transition: .3s; border-radius: 28px; }
-        .slider:before { position: absolute; content: ""; height: 24px; width: 24px; left: 2px; bottom: 2px; background-color: white; transition: .3s; border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.15); }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #E5E5EA; transition: .3s; border-radius: 26px; }
+        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
         input:checked + .slider { background-color: var(--accent-dark); }
         input:checked + .slider:before { transform: translateX(20px); }
 
         /* Фиксированный низ */
-        .sticky-bottom-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); border-top: 1px solid var(--border); padding: 15px 20px calc(15px + var(--safe-bottom)); display: flex; justify-content: space-between; align-items: center; z-index: 1000; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); will-change: transform; }
+        .sticky-bottom-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(15px); border-top: 1px solid var(--border); padding: 15px 20px calc(15px + var(--safe-bottom)); display: flex; justify-content: space-between; align-items: center; z-index: 1000; box-shadow: 0 -5px 20px rgba(0,0,0,0.03); transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); will-change: transform; }
         .sticky-bottom-bar.visible { transform: translateY(0); }
         .sticky-price-info { display: flex; flex-direction: column; }
-        .sticky-price-lbl { font-size: 11px; color: var(--text-muted); font-weight: 800; text-transform: uppercase; margin-bottom: 2px; letter-spacing: 0.5px;}
-        .sticky-price-val { font-size: 24px; font-weight: 800; color: var(--accent-dark); transition: 0.2s;}
-        .sticky-bottom-bar .btn { width: auto; padding: 14px 40px; margin: 0; font-size: 16px;}
+        .sticky-price-lbl { font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; margin-bottom: 2px; }
+        .sticky-price-val { font-size: 22px; font-weight: 800; color: var(--accent-dark); transition: 0.2s;}
+        .sticky-bottom-bar .btn { width: auto; padding: 14px 35px; margin: 0; font-size: 15px;}
 
-        /* ================= КАЛЬКУЛЯТОР ================= */
-        .calc-wrapper { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 32px 24px; margin-bottom: 40px; box-shadow: var(--shadow-float);}
-        .calc-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-        .calc-header h2 { font-size: 22px; font-weight: 800; color: var(--accent-dark); margin: 0; display: flex; align-items: center; gap: 8px;}
-        
-        .tabs-container { background: var(--bg-page); padding: 4px; border-radius: 12px; display: flex; margin-bottom: 30px; position: relative; border: 1px solid var(--border); }
-        .tab { flex: 1; text-align: center; padding: 12px 0; font-size: 14px; font-weight: 700; color: var(--text-muted); cursor: pointer; z-index: 2; transition: all 0.3s; }
-        .tab.active { color: var(--text-main); }
-        .tab-slider { position: absolute; top: 4px; bottom: 4px; left: 4px; width: calc(50% - 4px); background: var(--surface); border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1); z-index: 1; }
-        .tab.disabled { opacity: 0.4; pointer-events: none; }
+        /* ================= КАЛЬКУЛЯТОР РАССРОЧКИ (ТОЧЕЧНЫЕ ИСПРАВЛЕНИЯ) ================= */
+        .calc-wrapper { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 25px; margin-bottom: 40px; box-shadow: 0 2px 10px rgba(0,0,0,0.02);}
+        .calc-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .calc-header h2 { font-size: 20px; font-weight: 800; color: var(--accent-dark); margin: 0; display: flex; align-items: center; gap: 8px;}
 
         .label-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; margin-top: 25px; }
         .label-row.first { margin-top: 0; }
-        .label-row label { font-weight: 700; font-size: 13px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;}
-        .val-badge { font-weight: 800; font-size: 18px; color: var(--accent-green); font-variant-numeric: tabular-nums; text-align: right; }
+        .label-row label { font-weight: 600; font-size: 13px; color: var(--text-muted); text-transform: uppercase; }
+        .val-badge { font-weight: 800; font-size: 16px; color: var(--accent-green); font-variant-numeric: tabular-nums; text-align: right; }
         
-        .price-input-wrapper { display: flex; align-items: center; background: var(--bg-page); border: 1.5px solid var(--border); border-radius: 12px; padding: 16px 20px; transition: 0.2s; }
-        .price-input-wrapper.readonly { background: var(--surface); border-color: transparent; padding: 10px 0;}
-        .price-input-wrapper:focus-within { border-color: var(--accent-green); box-shadow: 0 0 0 4px var(--accent-green-bg);}
-        .price-input-wrapper input { width: 100%; border: none; background: transparent; font-size: 24px; font-weight: 800; color: var(--text-main); font-variant-numeric: tabular-nums; }
-        .price-input-wrapper span { font-size: 18px; font-weight: 700; color: var(--text-muted); margin-left: 8px; }
+        /* ИСПРАВЛЕНИЕ 1: Одинаковый серый фон для обоих полей */
+        .price-input-wrapper { display: flex; align-items: center; background: var(--bg-page); border: 1px solid var(--border); border-radius: 12px; padding: 14px 18px; transition: 0.2s; pointer-events: auto; }
+        /* Делаем верхнее поле некликабельным, но с тем же стилем */
+        .price-input-wrapper.readonly { pointer-events: none; }
         
-        /* Сочные ползунки с аппаратным ускорением */
-        input[type="range"] { -webkit-appearance: none; width: 100%; height: 8px; background: var(--border); border-radius: 10px; outline: none; margin: 24px 0 10px 0; touch-action: none; transition: background 0.1s; will-change: transform;}
-        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 32px; height: 32px; border-radius: 50%; background: #ffffff; border: 3px solid var(--accent-green); cursor: pointer; box-shadow: 0 4px 12px rgba(0, 168, 107, 0.25); }
-        .limits-text { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted); font-weight: 600; }
+        .price-input-wrapper:focus-within { border-color: var(--accent-green); background: var(--surface); }
+        .price-input-wrapper input { width: 100%; border: none; background: transparent; font-size: 20px; font-weight: 800; color: var(--text-main); font-variant-numeric: tabular-nums; }
+        .price-input-wrapper span { font-size: 16px; font-weight: 700; color: var(--text-muted); margin-left: 8px; }
+        
+        input[type="range"] { -webkit-appearance: none; width: 100%; height: 6px; background: var(--border); border-radius: 8px; outline: none; margin: 20px 0 10px 0; touch-action: none; transition: background 0.1s; will-change: transform;}
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 28px; height: 28px; border-radius: 50%; background: #ffffff; border: 2px solid var(--accent-green); cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .limits-text { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); font-weight: 600; }
         
         #dp-container { overflow: hidden; transition: max-height 0.4s ease, opacity 0.4s ease; max-height: 300px; opacity: 1; }
-        #dp-container.hidden { max-height: 0; opacity: 0; margin-top: -10px; pointer-events: none; }
 
-        .result-card { background: var(--bg-page); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 25px; margin-top: 35px; }
-        .result-card h3 { margin: 0 0 20px 0; font-size: 16px; color: var(--accent-dark); font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;}
-        .check-row { display: flex; align-items: baseline; margin-bottom: 14px; font-size: 14px; color: var(--text-muted); font-weight: 500;}
-        .check-row.bold { font-size: 15px; color: var(--text-main); font-weight: 700; margin-bottom: 16px; }
-        .check-row .label { white-space: nowrap; }
-        .check-row .dots { flex-grow: 1; border-bottom: 1.5px dotted var(--border); margin: 0 12px; position: relative; top: -4px; }
-        .check-row .value { white-space: nowrap; font-variant-numeric: tabular-nums; color: var(--text-main); font-weight: 700; text-align: right;}
+        /* ИСПРАВЛЕНИЕ 2: Ровный чек без вылета за рамки */
+        .result-card { background: var(--bg-page); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 25px; margin-top: 30px; }
+        .result-card h3 { margin: 0 0 20px 0; font-size: 16px; color: var(--accent-dark); font-weight: 700; text-transform: uppercase; }
         
-        .total-price-row { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding-top: 20px; border-top: 1.5px solid var(--border); }
-        .total-price-label { font-size: 18px; font-weight: 800; color: var(--text-muted); }
-        .total-price-value { font-size: 26px; font-weight: 800; color: var(--accent-green); font-variant-numeric: tabular-nums;}
+        .check-row { display: flex; align-items: baseline; margin-bottom: 12px; font-size: 13px; color: var(--text-muted); font-weight: 500; width: 100%; }
+        .check-row.bold { font-size: 14px; color: var(--text-main); font-weight: 700; margin-top: 16px; margin-bottom: 12px; }
+        .check-row .label { white-space: nowrap; flex-shrink: 0; }
+        .check-row .dots { flex-grow: 1; border-bottom: 1px dotted var(--text-muted); margin: 0 8px; position: relative; top: -3px; opacity: 0.5; }
+        .check-row .value { white-space: nowrap; font-variant-numeric: tabular-nums; color: var(--text-main); font-weight: 700; text-align: right; flex-shrink: 0; }
+        
+        .total-price-row { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border); }
+        .total-price-label { font-size: 16px; font-weight: 700; color: var(--text-muted); }
+        .total-price-value { font-size: 24px; font-weight: 800; color: var(--accent-mint-text); font-variant-numeric: tabular-nums;}
 
-        .schedule-btn { width: 100%; background: var(--surface); border: 1.5px solid var(--border); color: var(--accent-dark); padding: 14px; border-radius: var(--radius-sm); font-weight: 700; font-size: 14px; margin-top: 25px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; transition: 0.2s; }
-        .schedule-btn:active { transform: scale(0.98); }
+        .schedule-btn { width: 100%; background: var(--surface); border: 1px solid var(--border); color: var(--accent-dark); padding: 12px; border-radius: var(--radius-sm); font-weight: 700; font-size: 13px; margin-top: 20px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; transition: 0.2s; }
+        .schedule-btn:hover { background: var(--bg-page); }
         .schedule-list { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; }
         .schedule-list.open { max-height: 1200px; margin-top: 16px; transition: max-height 0.5s ease-in; }
-        .schedule-item { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 13px; color: var(--text-main); font-variant-numeric: tabular-nums; font-weight: 500;}
+        .schedule-item { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 13px; color: var(--text-main); font-variant-numeric: tabular-nums;}
         .schedule-item:last-child { border-bottom: none; }
-        .schedule-item.dp-item { font-weight: 800; color: var(--accent-green); border-bottom: 2px solid var(--border); padding-bottom: 14px; margin-bottom: 6px; }
+        .schedule-item.dp-item { font-weight: 700; color: var(--accent-dark); border-bottom: 2px solid var(--border); padding-bottom: 14px; margin-bottom: 6px; }
 
         /* ================= АДМИН-ПАНЕЛЬ И CRM ================= */
         .admin-tabs { display: flex; gap: 10px; margin-bottom: 30px; border-bottom: 1px solid var(--border); padding-bottom: 15px; overflow-x: auto; scrollbar-width: none; }
         .tab-btn { padding: 10px 20px; font-size: 14px; font-weight: 600; color: var(--text-muted); transition: 0.2s; cursor: pointer; white-space: nowrap; border-radius: 20px; }
         .tab-btn.active { background: var(--accent-dark); color: #fff; }
 
-        .admin-panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 30px; margin-bottom: 40px; box-shadow: var(--shadow-float);}
+        .admin-panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 30px; margin-bottom: 40px; box-shadow: 0 2px 10px rgba(0,0,0,0.02);}
         
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
         .stats-box { background: var(--bg-page); border: 1px solid var(--border); padding: 25px; border-radius: var(--radius-md); }
-        .stats-box h3 { font-size: 13px; color: var(--text-muted); font-weight: 700; margin-bottom: 8px; text-transform: uppercase; }
+        .stats-box h3 { font-size: 13px; color: var(--text-muted); font-weight: 600; margin-bottom: 8px; text-transform: uppercase; }
         .stats-box .val { font-size: 32px; font-weight: 800; color: var(--accent-dark); }
-        .stats-box .val-profit { color: var(--accent-green); }
+        .stats-box .val-profit { color: var(--accent-mint-text); }
 
         .form-group { margin-bottom: 25px; }
         .form-label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 10px; color: var(--text-muted); text-transform: uppercase; }
-        .form-control { width: 100%; padding: 16px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-size: 15px; background: var(--surface); transition: 0.2s; font-weight: 500; }
+        .form-control { width: 100%; padding: 15px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 15px; background: var(--surface); transition: 0.2s; font-weight: 500; }
         .form-control:focus { border-color: var(--accent-dark); }
         
         .dynamic-row { display: grid; grid-template-columns: 1fr auto; gap: 15px; align-items: center; background: var(--bg-page); padding: 16px; border-radius: var(--radius-md); margin-bottom: 12px; border: 1px solid var(--border); }
@@ -230,23 +228,23 @@
         input[type="color"]::-webkit-color-swatch { border: 1px solid var(--border); border-radius: 6px; }
 
         /* Кнопки выбора SIM в Админке */
-        .admin-sim-toggle { display: flex; background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius-sm); overflow: hidden;}
-        .sim-opt { flex: 1; text-align: center; padding: 14px 5px; font-size: 12px; font-weight: 700; color: var(--text-muted); cursor: pointer; transition: 0.2s; border-right: 1px solid var(--border);}
+        .admin-sim-toggle { display: flex; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden;}
+        .sim-opt { flex: 1; text-align: center; padding: 14px 5px; font-size: 12px; font-weight: 600; color: var(--text-muted); cursor: pointer; transition: 0.2s; border-right: 1px solid var(--border);}
         .sim-opt:last-child { border-right: none; }
         .sim-opt.active { background: var(--accent-dark); color: #fff; }
 
         /* CRM ЗАКАЗЫ */
         .crm-search { margin-bottom: 20px; position: relative; }
-        .crm-search input { width: 100%; padding: 16px 20px 16px 45px; border-radius: var(--radius-sm); border: 1.5px solid var(--border); font-size: 15px; }
+        .crm-search input { width: 100%; padding: 14px 20px 14px 40px; border-radius: var(--radius-sm); border: 1px solid var(--border); font-size: 14px; }
         .order-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 20px; margin-bottom: 15px; }
         .order-header { display: flex; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px; align-items: center;}
-        .order-id { font-size: 14px; font-weight: 800; color: var(--accent-dark); background: var(--bg-page); padding: 6px 10px; border-radius: 6px;}
-        .order-status { font-size: 12px; font-weight: 700; padding: 6px 12px; border-radius: 12px; }
+        .order-id { font-size: 14px; font-weight: 800; color: var(--accent-dark); background: var(--bg-page); padding: 4px 8px; border-radius: 6px;}
+        .order-status { font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 12px; }
         .status-new { background: #FFF3E0; color: #E65100; }
-        .status-done { background: var(--accent-mint-bg); color: var(--accent-green); }
+        .status-done { background: var(--accent-mint-bg); color: var(--accent-mint-text); }
         .order-client { font-size: 16px; font-weight: 700; margin-bottom: 5px; }
         .order-phone { font-size: 14px; color: var(--text-muted); font-weight: 600; margin-bottom: 15px; }
-        .order-details { font-size: 13px; line-height: 1.5; color: var(--text-muted); margin-bottom: 15px; background: var(--bg-page); padding: 15px; border-radius: var(--radius-sm); border: 1px solid var(--border);}
+        .order-details { font-size: 13px; line-height: 1.5; color: var(--text-muted); margin-bottom: 15px; background: var(--bg-page); padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border);}
         .order-details strong { color: var(--text-main); font-size: 14px; display: block; margin-bottom: 5px;}
         .order-fin { display: flex; justify-content: space-between; border-top: 1px solid var(--border); margin-top: 10px; padding-top: 10px; font-weight: 600; color: var(--accent-dark);}
         
@@ -264,9 +262,10 @@
 
     <div id="toast-container"></div>
 
+    <!-- МОДАЛКА: PIN-КОД -->
     <div class="modal-overlay" id="pinModal">
         <div class="modal-content">
-            <h3>Доступ администратора</h3>
+            <h3>Вход администратора</h3>
             <input type="password" id="pinInput" class="form-control pin-input" placeholder="••••" maxlength="4" inputmode="numeric">
             <div class="modal-btns">
                 <button class="btn btn-outline" onclick="closePinModal()">Отмена</button>
@@ -275,12 +274,13 @@
         </div>
     </div>
 
+    <!-- МОДАЛКА: ОФОРМЛЕНИЕ ЗАКАЗА (CRM) -->
     <div class="modal-overlay" id="orderModal">
         <div class="modal-content" style="text-align: left;">
             <h3 style="text-align: center; margin-bottom: 10px;">Оформление заказа</h3>
             <p style="font-size: 13px; color: var(--text-muted); text-align: center; margin-bottom: 20px;">Введите данные для связи с менеджером.</p>
             <label class="form-label">Ваше имя</label>
-            <input type="text" id="clientName" class="form-control" placeholder="Асхаб">
+            <input type="text" id="clientName" class="form-control" placeholder="Например: Асхаб">
             <label class="form-label">Номер телефона</label>
             <input type="tel" id="clientPhone" class="form-control" placeholder="+7 (999) 000-00-00">
             <div class="modal-btns">
@@ -290,6 +290,7 @@
         </div>
     </div>
 
+    <!-- ШАПКА -->
     <header>
         <div class="header-content" id="secretLogo">
             <div class="logo-main">HAZIR-22</div>
@@ -297,6 +298,7 @@
         </div>
     </header>
 
+    <!-- КЛИЕНТ: КАТАЛОГ -->
     <main id="viewCatalog" class="container main-content">
         <div class="hero-banner banner-light" id="clientBanner" onclick="handleBannerClick()">
             <h2 id="heroTitle">Загрузка...</h2>
@@ -305,15 +307,15 @@
         </div>
 
         <div class="search-container">
-            <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
             <input type="text" id="searchInput" placeholder="Найти устройство..." oninput="renderCatalog()">
         </div>
 
         <div class="filters" id="brandFilters"></div>
         <div class="grid" id="catalogGrid"></div>
-        <div id="emptyCatalogMsg" class="empty-state hidden">Витрина пока пуста. Добавьте первый товар через панель администратора.</div>
     </main>
 
+    <!-- КЛИЕНТ: ТОВАР -->
     <main id="viewProduct" class="container main-content hidden">
         <div class="nav-back" onclick="switchView('viewCatalog')">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px;"><polyline points="15 18 9 12 15 6"></polyline></svg> В каталог
@@ -328,24 +330,25 @@
                 <div class="installment-trigger" onclick="openCalculatorFromProduct()">
                     <div>
                         <div class="installment-trigger-text">Посчитать рассрочку</div>
-                        <div style="font-size: 11px; opacity: 0.8; color: var(--accent-green); margin-top: 4px;">Калькулятор взносов (от 3 до 12 мес.)</div>
+                        <div style="font-size: 11px; opacity: 0.7; color: var(--accent-mint-text); margin-top: 4px;">Калькулятор взносов (от 3 до 12 мес.)</div>
                     </div>
                     <div class="installment-trigger-val">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
                     </div>
                 </div>
 
-                <div class="section-title"><span>Цвет</span><span id="pdColorNameDisplay" style="text-transform: none; font-weight: 600;"></span></div>
+                <div class="section-title"><span>Цвет</span><span id="pdColorNameDisplay" style="text-transform: none; font-weight: 500;"></span></div>
                 <div class="color-row" id="pdColors"></div>
 
                 <div class="section-title">Память и Связь</div>
                 <div class="sku-grid" id="pdSkus"></div>
 
-                <div class="section-title" id="accTitle">Дополнительно</div>
+                <div class="section-title" id="accTitle">Дополнительно (Кросс-продажи)</div>
                 <div id="pdAccessories"></div>
             </div>
         </div>
 
+        <!-- STICKY BOTTOM BAR -->
         <div class="sticky-bottom-bar" id="stickyBottomBar">
             <div class="sticky-price-info">
                 <span class="sticky-price-lbl">Итоговая стоимость:</span>
@@ -355,6 +358,7 @@
         </div>
     </main>
 
+    <!-- КАЛЬКУЛЯТОР -->
     <main id="viewCalculator" class="container main-content hidden">
         <div class="nav-back" onclick="switchView('viewProduct')">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px;"><polyline points="15 18 9 12 15 6"></polyline></svg> Назад к товару
@@ -368,12 +372,7 @@
                 </h2>
             </div>
 
-            <div class="tabs-container">
-                <div class="tab-slider" id="tab-bg"></div>
-                <div class="tab active" id="tab-with-dp" onclick="triggerHaptic('light'); setDpMode(true)">С первым взносом</div>
-                <div class="tab" id="tab-no-dp" onclick="triggerHaptic('light'); setDpMode(false)">Без взноса</div>
-            </div>
-
+            <!-- ИСПРАВЛЕНИЕ 1: Одинаковый фон и рамка -->
             <div class="label-row first"><label>Итоговая стоимость товара</label></div>
             <div class="price-input-wrapper readonly">
                 <input type="number" id="price-input" readonly>
@@ -395,18 +394,19 @@
                     <input type="number" id="dp-input" value="0" step="100" oninput="handleInput('dp')" onblur="handleBlur('dp')">
                     <span>руб.</span>
                 </div>
-                <div id="dp-warning" style="font-size: 12px; color: var(--accent-green); margin-top: 10px; font-weight: 700; display: none;">ℹ️ При сумме от 100 000 руб. минимальный взнос 25%</div>
+                <div id="dp-warning" style="font-size: 11px; color: var(--accent-green); margin-top: 8px; font-weight: 700; display: none;">ℹ️ При сумме от 100 000 руб. минимальный взнос 25%</div>
                 <input type="range" id="dp-slider" min="0" max="80" value="25" step="1" oninput="handleSlider('dp')" onchange="handleRelease()">
                 <div class="limits-text"><span id="dp-min-lbl">0%</span><span id="dp-max-lbl">80%</span></div>
             </div>
 
             <div class="result-card" id="receipt-content">
-                <h3 id="t-res-title">Результат расчета</h3>
+                <h3>Результат расчета</h3>
                 <div class="check-row"><span class="label">Товар + Допы</span><span class="dots"></span><span class="value" id="res-price"></span></div>
                 <div class="check-row"><span class="label">Срок Рассрочки</span><span class="dots"></span><span class="value" id="res-months"></span></div>
                 <div class="check-row" id="res-dp-rub-row"><span class="label">Взнос</span><span class="dots"></span><span class="value" id="res-dp-rub"></span></div>
                 
-                <div class="check-row bold" style="margin-top:20px;"><span class="label">Ежемесячный платеж</span><span class="dots"></span><span class="value" id="res-monthly"></span></div>
+                <!-- ИСПРАВЛЕНИЕ 2: Короткий текст (Платёж в месяц) и ровные рамки -->
+                <div class="check-row bold"><span class="label">Платёж в месяц</span><span class="dots"></span><span class="value" id="res-monthly"></span></div>
                 <div class="check-row bold"><span class="label">Торговая наценка</span><span class="dots"></span><span class="value" id="res-markup"></span></div>
                 
                 <div class="total-price-row">
@@ -422,6 +422,7 @@
         </div>
     </main>
 
+    <!-- АДМИНКА -->
     <main id="viewAdmin" class="container main-content hidden">
         <div class="admin-panel">
             <div class="admin-tabs">
@@ -431,6 +432,7 @@
                 <div class="tab-btn" onclick="triggerHaptic('light'); switchTab('tabList')">Витрина</div>
             </div>
 
+            <!-- ДАШБОРД -->
             <div id="tabStats">
                 <div class="stats-grid">
                     <div class="stats-box"><h3>Касса (Выручка)</h3><div class="val" id="statRevenue">0 ₽</div><button class="btn btn-outline" style="padding: 10px; font-size: 12px;" onclick="requestResetRevenue()">Обнулить кассу</button></div>
@@ -455,17 +457,19 @@
                 </div>
             </div>
 
+            <!-- CRM ЗАКАЗЫ -->
             <div id="tabOrders" class="hidden">
                 <div class="stats-box" style="background: var(--surface);">
-                    <h3 style="color: var(--text-main); font-size: 16px; margin-bottom: 15px;">Заказы клиентов</h3>
+                    <h3 style="color: var(--text-main); font-size: 16px; margin-bottom: 15px;">Управление заказами</h3>
                     <div class="crm-search">
                         <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="position:absolute; left:15px; top:15px; opacity:0.5;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                        <input type="text" id="crmSearchInput" placeholder="Поиск по имени или телефону..." oninput="renderOrders()">
+                        <input type="text" id="crmSearchInput" placeholder="Поиск по номеру заказа, имени или телефону..." oninput="renderOrders()">
                     </div>
                     <div id="adminOrdersList"></div>
                 </div>
             </div>
 
+            <!-- РЕДАКТОР SKU -->
             <div id="tabEdit" class="hidden">
                 <input type="hidden" id="editProductId">
                 
@@ -502,12 +506,16 @@
                 <button class="btn btn-primary" onclick="saveProduct()" style="margin-top: 40px; padding: 18px; font-size: 16px;">Опубликовать объявление</button>
             </div>
 
+            <!-- ВИТРИНА -->
             <div id="tabList" class="hidden">
                 <div id="adminProductList"></div>
             </div>
         </div>
     </main>
 
+    <!-- ========================================== -->
+    <!-- СКРИПТЫ (БЕЗОПАСНЫЙ РЕНДЕР) -->
+    <!-- ========================================== -->
     <script>
         const tg = window.Telegram ? window.Telegram.WebApp : null;
         if(tg && tg.expand) { tg.expand(); if(tg.MainButton) tg.MainButton.hide(); }
@@ -517,7 +525,6 @@
             if (tg && tg.HapticFeedback) { tg.HapticFeedback.impactOccurred(style); }
         }
 
-        // КЛИКИ НА КНОПКИ (Добавляем тактильность)
         document.querySelectorAll('.btn').forEach(btn => {
             btn.addEventListener('click', () => triggerHaptic('light'));
         });
@@ -554,7 +561,7 @@
             if (clickCount >= 5) { clickCount = 0; openPinModal(); } else { clickTimer = setTimeout(() => { clickCount = 0; }, 1000); }
         });
 
-        // 🛡 УМНЫЙ ПРЕДОХРАНИТЕЛЬ ОТ БИТЫХ МАССИВОВ (SPARSE ARRAYS)
+        // 🛡 УМНЫЙ ПРЕДОХРАНИТЕЛЬ ОТ БИТЫХ МАССИВОВ
         function safeArray(data) {
             if (!data) return [];
             if (Array.isArray(data)) return data.filter(Boolean);
@@ -562,17 +569,16 @@
             return [];
         }
 
-        // БАЗА ДАННЫХ НОВАЯ ВЕРСИЯ V11 (ЧИСТЫЙ СТАРТ - НИКАКИХ ДЕМО)
+        // БАЗА ДАННЫХ НОВАЯ ВЕРСИЯ V11
         const firebaseConfig = { apiKey: "AIzaSyCLnm2OlGpXcUw0gjNtomUS7O1ktKRLilw", authDomain: "khanifcatalog.firebaseapp.com", databaseURL: "https://khanifcatalog-default-rtdb.europe-west1.firebasedatabase.app/", projectId: "khanifcatalog", storageBucket: "khanifcatalog.firebasestorage.app" };
         const DB_PATH = 'hazir22_data/v11_luxury'; const REV_PATH = 'hazir22_data/revenue'; const PROFIT_PATH = 'hazir22_data/profit'; const BANNER_PATH = 'hazir22_data/settings/banner'; const ORDERS_PATH = 'hazir22_data/orders';
         
-        let db, products = {}, orders = {}, totalRevenue = 0, totalProfit = 0, activeFilter = 'All', bannerData = { style: 'banner-dark', link: '' };
+        let db, products = {}, orders = {}, totalRevenue = 0, totalProfit = 0, activeFilter = 'All', bannerData = { style: 'banner-light', link: '' };
         let storeManagerPhone = "79298961858"; 
 
         try {
             firebase.initializeApp(firebaseConfig); db = firebase.database();
             
-            // ПРОДУКТЫ 
             db.ref(DB_PATH).on('value', snap => {
                 products = {};
                 if (snap.exists()) {
@@ -598,7 +604,7 @@
                             p.accessories = safeAcc;
 
                             products[key] = p;
-                        } catch (err) { console.error("Skipped bad product format:", key); }
+                        } catch (err) {}
                     });
                 }
                 renderCatalog(); renderAdminList(); updateBrandSelects();
@@ -640,10 +646,7 @@
             const grid = document.getElementById('catalogGrid'); grid.innerHTML = '';
             
             const prodKeys = Object.keys(products);
-            if (prodKeys.length === 0) {
-                document.getElementById('emptyCatalogMsg').classList.remove('hidden');
-            } else {
-                document.getElementById('emptyCatalogMsg').classList.add('hidden');
+            if (prodKeys.length > 0) {
                 prodKeys.forEach(id => {
                     const p = products[id];
                     if(activeFilter !== 'All' && p.brand !== activeFilter) return;
@@ -714,10 +717,7 @@
                     });
                 }
                 switchView('viewProduct');
-            } catch (e) { 
-                showToast("Ошибка загрузки товара."); 
-                console.error("OpenProduct Error:", e); 
-            }
+            } catch (e) { showToast("Ошибка загрузки"); }
         }
 
         function renderClientVariants() {
@@ -737,17 +737,15 @@
                     vGrid.appendChild(btn); if(i===0) currVariant = conf;
                 });
                 updateFinalPrice();
-            } catch (e) {
-                showToast("Сбой комплектаций: " + e.message);
-            }
+            } catch (e) {}
         }
 
         function toggleAcc(index, isChecked) { 
             selectedAccessories[index] = isChecked; 
             const el = document.getElementById('acc_item_' + index);
             if(el) {
-                if(isChecked) { el.classList.add('active'); }
-                else { el.classList.remove('active'); }
+                if(isChecked) el.classList.add('active');
+                else el.classList.remove('active');
             }
             updateFinalPrice(); 
         }
@@ -779,36 +777,25 @@
             triggerHaptic('medium');
             switchView('viewCalculator');
             elPriceInput.value = finalComputedPrice;
-            updateDpState(); calculateFinal();
+            updateDpState(); 
+            calculateFinal();
+            
+            // ИСПРАВЛЕНИЕ 2: Микро-задержка для стопроцентной закраски ползунков при открытии
+            setTimeout(() => { updateUI(); syncSliderVisuals(elDpSlider); syncSliderVisuals(elMonthsSlider); }, 50); 
         }
 
         function updateDpState() {
             let price = parseInt(elPriceInput.value) || 0; let minPct = price >= 100000 ? 25 : 0; let maxPct = 80;
             elDpSlider.min = minPct; elDpSlider.max = maxPct; safeSetText('dp-min-lbl', minPct + '%'); safeSetText('dp-max-lbl', maxPct + '%');
             
-            if (price >= 100000) { 
-                document.getElementById('tab-no-dp').classList.add('disabled'); document.getElementById('dp-warning').style.display = 'block'; 
-                if (!hasDownPayment) setDpMode(true); 
-            } else { 
-                document.getElementById('tab-no-dp').classList.remove('disabled'); document.getElementById('dp-warning').style.display = 'none'; 
-            }
+            if (price >= 100000) { document.getElementById('dp-warning').style.display = 'block'; } 
+            else { document.getElementById('dp-warning').style.display = 'none'; }
             
             let currentPct = parseInt(elDpSlider.value) || 0; if (currentPct < minPct) currentPct = minPct; if (currentPct > maxPct) currentPct = maxPct; elDpSlider.value = currentPct;
             let rub = Math.floor(price * (currentPct / 100)); rub = Math.round(rub / 100) * 100; elDpInput.value = rub;
             syncSliderVisuals(elDpSlider);
         }
 
-        function setDpMode(withDp) {
-            let price = parseInt(elPriceInput.value) || 0; if (!withDp && price >= 100000) return; 
-            hasDownPayment = withDp;
-            document.getElementById('tab-bg').style.transform = withDp ? 'translateX(0)' : 'translateX(100%)'; document.getElementById('tab-with-dp').classList.toggle('active', withDp); document.getElementById('tab-no-dp').classList.toggle('active', !withDp);
-            if (withDp) { document.getElementById('dp-container').classList.remove('hidden'); document.getElementById('res-dp-rub-row').style.display = 'flex'; } 
-            else { document.getElementById('dp-container').classList.add('hidden'); document.getElementById('res-dp-rub-row').style.display = 'none'; }
-            updateUI(); calculateFinal();
-        }
-
-        // 🛡 Аппаратно-ускоренные градиенты ползунков
-        let isSliding = false;
         function syncSliderVisuals(slider) { 
             let min = parseInt(slider.min) || 0; let max = parseInt(slider.max) || 100; let val = parseInt(slider.value) || 0; 
             let percentage = ((val - min) / (max - min)) * 100; percentage = Math.max(0, Math.min(100, percentage)); 
@@ -816,33 +803,40 @@
         }
 
         function handleInput(type) { if (type === 'dp') { let rub = parseInt(elDpInput.value) || 0; let price = parseInt(elPriceInput.value) || 0; let pct = price > 0 ? (rub / price) * 100 : 0; elDpSlider.value = pct; syncSliderVisuals(elDpSlider); } updateUI(); }
+        
+        let isSliding = false;
         function handleSlider(type) { 
             if (type === 'dp') { let price = parseInt(elPriceInput.value) || 0; let pct = parseInt(elDpSlider.value) || 0; let rub = Math.floor(price * (pct / 100)); rub = Math.round(rub / 100) * 100; elDpInput.value = rub; syncSliderVisuals(elDpSlider); } 
             else if (type === 'months') { syncSliderVisuals(elMonthsSlider); } 
             updateUI(); 
-            // Легкая тактильность при движении
-            if(!isSliding) { isSliding = true; setTimeout(() => { triggerHaptic('light'); isSliding = false; }, 100); }
+            if(!isSliding) { isSliding = true; setTimeout(() => { triggerHaptic('light'); isSliding = false; }, 80); }
         }
+
         function handleBlur(type) { if (type === 'dp') { let price = parseInt(elPriceInput.value) || 0; let rub = parseInt(elDpInput.value) || 0; let minPct = price >= 100000 ? 25 : 0; let minRub = Math.floor(price * (minPct / 100)); let maxRub = Math.floor(price * 0.8); if (rub < minRub) rub = minRub; if (rub > maxRub) rub = maxRub; rub = Math.round(rub / 100) * 100; elDpInput.value = rub; elDpSlider.value = (rub / price) * 100; syncSliderVisuals(elDpSlider); } updateUI(); calculateFinal(); }
         function handleRelease() { calculateFinal(); triggerHaptic('medium'); }
 
         function updateUI() {
-            let price = parseInt(elPriceInput.value) || 0; let months = parseInt(elMonthsSlider.value) || 3; let rubDp = hasDownPayment ? (parseInt(elDpInput.value) || 0) : 0; let dpPercent = price > 0 ? Math.round((rubDp / price) * 100) : 0;
-            safeSetText('months-val', `${months} мес.`); safeSetText('dp-badge', hasDownPayment ? `${dpPercent} %` : '0 %');
+            let price = parseInt(elPriceInput.value) || 0; let months = parseInt(elMonthsSlider.value) || 3; let rubDp = parseInt(elDpInput.value) || 0; let dpPercent = price > 0 ? Math.round((rubDp / price) * 100) : 0;
+            safeSetText('months-val', `${months} мес.`); safeSetText('dp-badge', `${dpPercent} %`);
             syncSliderVisuals(elDpSlider); syncSliderVisuals(elMonthsSlider);
         }
         function formatMoney(amount) { return amount.toLocaleString('ru-RU').replace(/\s/g, '.'); }
 
         function calculateFinal() {
-            let price = parseInt(elPriceInput.value) || 0; let months = parseInt(elMonthsSlider.value) || 3; let dp = hasDownPayment ? (parseInt(elDpInput.value) || 0) : 0; let dpPercent = price > 0 ? Math.round((dp / price) * 100) : 0;
+            let price = parseInt(elPriceInput.value) || 0; let months = parseInt(elMonthsSlider.value) || 3; let dp = parseInt(elDpInput.value) || 0; 
             let financedAmount = price - dp; let monthlyRate = 0.04; let rawTotalDebt = financedAmount + (financedAmount * monthlyRate * months); let finalMonthlyPayment = Math.ceil((rawTotalDebt / months) / 50) * 50; let remainingDebt = finalMonthlyPayment * months; let totalMarkup = remainingDebt - financedAmount; let totalInstallmentPrice = remainingDebt + dp;   
             
-            safeSetText('res-price', `${formatMoney(price)} руб.`); safeSetText('res-months', `${months} мес.`); safeSetText('res-dp-rub', hasDownPayment ? `${formatMoney(dp)} руб.` : '—'); safeSetText('res-monthly', `${formatMoney(finalMonthlyPayment)} руб.`); safeSetText('res-markup', `${formatMoney(totalMarkup)} руб.`); safeSetText('res-total', `${formatMoney(totalInstallmentPrice)} ₽`);
+            safeSetText('res-price', `${formatMoney(price)} руб.`); 
+            safeSetText('res-months', `${months} мес.`); 
+            safeSetText('res-dp-rub', `${formatMoney(dp)} руб.`); 
+            safeSetText('res-monthly', `${formatMoney(finalMonthlyPayment)} руб.`); 
+            safeSetText('res-markup', `${formatMoney(totalMarkup)} руб.`); 
+            safeSetText('res-total', `${formatMoney(totalInstallmentPrice)} ₽`);
             
             calcData = { months: months, dpRub: dp, monthlyPayment: finalMonthlyPayment, totalInstallmentPrice: totalInstallmentPrice, markup: totalMarkup };
 
             let html = ''; let today = new Date();
-            if (hasDownPayment && dp > 0) { let dStr = today.toLocaleDateString('ru-RU', {day: 'numeric', month: 'short', year: 'numeric'}); html += `<div class="schedule-item dp-item"><span>Первый взнос (${dStr})</span><span>${formatMoney(dp)} ₽</span></div>`; }
+            if (dp > 0) { let dStr = today.toLocaleDateString('ru-RU', {day: 'numeric', month: 'short', year: 'numeric'}); html += `<div class="schedule-item dp-item"><span>Первый взнос (${dStr})</span><span>${formatMoney(dp)} ₽</span></div>`; }
             for (let i = 1; i <= months; i++) { let d = new Date(today.getFullYear(), today.getMonth() + i, today.getDate()); let dStr = d.toLocaleDateString('ru-RU', {day: 'numeric', month: 'short', year: 'numeric'}); html += `<div class="schedule-item"><span>${i} платеж (${dStr})</span><span>${formatMoney(finalMonthlyPayment)} ₽</span></div>`; }
             document.getElementById('schedule-container').innerHTML = html;
         }
@@ -885,7 +879,6 @@
 
         function saveBanner() { if(db) { db.ref(BANNER_PATH).set({ style: document.getElementById('adminBannerStyle').value, title: document.getElementById('adminBannerTitle').value, subtitle: document.getElementById('adminBannerSub').value, badge: document.getElementById('adminBannerBadge').value, link: document.getElementById('adminBannerLink').value }); showToast('Дизайн применен'); } }
         
-        // 🛡 Исправленный выпадающий список для брендов
         function updateBrandSelects() { 
             const select = document.getElementById('addBrandSelect'); 
             const brands = ['All', ...new Set(Object.values(products).map(p => p.brand))].filter(b => b !== 'All'); 
@@ -936,7 +929,7 @@
                     <select class="form-control v-color">${optionsHTML}</select>
                     <input type="text" class="form-control v-mem" placeholder="Память (Напр: 256GB)" value="${vMem}">
                     
-                    <div class="admin-sim-toggle" style="display:flex; background:var(--surface); border:1.5px solid var(--border); border-radius:var(--radius-sm); overflow:hidden;">
+                    <div class="admin-sim-toggle" style="display:flex; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-sm); overflow:hidden;">
                         <div class="sim-opt ${currentSim==='eSIM'?'active':''}" style="flex:1; text-align:center; padding:12px; font-size:12px; font-weight:600; color:var(--text-muted); cursor:pointer; border-right:1px solid var(--border);" onclick="setSimOpt(this, 'eSIM')">eSIM</div>
                         <div class="sim-opt ${currentSim==='SIM+eSIM'?'active':''}" style="flex:1; text-align:center; padding:12px; font-size:12px; font-weight:600; color:var(--text-muted); cursor:pointer; border-right:1px solid var(--border);" onclick="setSimOpt(this, 'SIM+eSIM')">SIM+eSIM</div>
                         <div class="sim-opt ${currentSim==='Dual SIM'?'active':''}" style="flex:1; text-align:center; padding:12px; font-size:12px; font-weight:600; color:var(--text-muted); cursor:pointer;" onclick="setSimOpt(this, 'Dual SIM')">Dual SIM</div>
